@@ -24,6 +24,15 @@ spring:
       add-mappings: true
   main:
     allow-bean-definition-overriding: true
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java
+      exclude: WEB-INF/**
+  resources:
+    static-locations: classpath:/static/
+    cache:
+      period: 0
 
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml

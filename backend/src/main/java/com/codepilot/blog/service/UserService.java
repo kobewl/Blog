@@ -33,4 +33,19 @@ public interface UserService extends IService<User> {
 
     // 更新用户角色（管理员）
     void updateUserRole(Long id, Integer role);
+
+    /**
+     * 更新用户邮箱
+     */
+    void updateEmail(String email);
+
+    /**
+     * 更新用户名
+     */
+    void updateUsername(String username);
+
+    /**
+     * 更新密码
+     */
+    void updatePassword(String oldPassword, String newPassword);
 }

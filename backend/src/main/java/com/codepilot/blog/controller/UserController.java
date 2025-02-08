@@ -37,4 +37,25 @@ public class UserController {
         User user = userService.getCurrentUser();
         return Result.success(user);
     }
+
+    @ApiOperation("更新用户邮箱")
+    @PutMapping("/update/email")
+    public Result<Void> updateEmail(@RequestParam String email) {
+        userService.updateEmail(email);
+        return Result.success(null);
+    }
+
+    @ApiOperation("更新用户名")
+    @PutMapping("/update/username")
+    public Result<Void> updateUsername(@RequestParam String username) {
+        userService.updateUsername(username);
+        return Result.success(null);
+    }
+
+    @ApiOperation("更新密码")
+    @PutMapping("/update/password")
+    public Result<Void> updatePassword(@RequestParam String oldPassword, @RequestParam String newPassword) {
+        userService.updatePassword(oldPassword, newPassword);
+        return Result.success(null);
+    }
 }

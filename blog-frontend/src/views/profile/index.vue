@@ -146,20 +146,22 @@ const rules = {
     { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
   ],
   oldPassword: [
-    { required: true, message: '请输入旧密码', trigger: 'blur' }
+    { required: false, message: '请输入旧密码', trigger: 'blur' }
   ],
   newPassword: [
-    { required: true, message: '请输入新密码', trigger: 'blur' },
+    { required: false, message: '请输入新密码', trigger: 'blur' },
     { min: 6, message: '密码长度不能小于6位', trigger: 'blur' }
   ]
 }
 
 // 打开编辑对话框
 const handleEdit = () => {
-  form.value.username = userStore.userInfo?.username || ''
-  form.value.email = userStore.userInfo?.email || ''
-  form.value.oldPassword = ''
-  form.value.newPassword = ''
+  form.value = {
+    username: userStore.userInfo?.username || '',
+    email: userStore.userInfo?.email || '',
+    oldPassword: '',
+    newPassword: ''
+  }
   dialogVisible.value = true
 }
 
@@ -171,13 +173,24 @@ const handleSubmit = async () => {
     if (valid) {
       loading.value = true
       try {
-        await userStore.updateProfile(form.value)
-        ElMessage.success('更新成功')
+        // 更新用户名
+        if (form.value.username !== userStore.userInfo?.username) {
+          await userStore.updateUsername(form.value.username)
+        }
+        
+        // 更新邮箱
+        if (form.value.email !== userStore.userInfo?.email) {
+          await userStore.updateEmail(form.value.email)
+        }
+        
+        // 更新密码
+        if (form.value.oldPassword && form.value.newPassword) {
+          await userStore.updatePassword(form.value.oldPassword, form.value.newPassword)
+        }
+        
         dialogVisible.value = false
-        // 重新获取用户信息
-        await userStore.getUserInfo()
-      } catch (error) {
-        ElMessage.error('更新失败，请重试')
+      } catch (error: any) {
+        ElMessage.error(error?.message || '更新失败，请重试')
       } finally {
         loading.value = false
       }

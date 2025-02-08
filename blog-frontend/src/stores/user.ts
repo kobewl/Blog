@@ -90,6 +90,43 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  // 更新邮箱
+  const updateEmail = async (email: string) => {
+    try {
+      await request.put('/user/update/email', null, { params: { email } })
+      await getUserInfo() // 更新后重新获取用户信息
+      ElMessage.success('邮箱更新成功')
+    } catch (error) {
+      console.error('更新邮箱失败:', error)
+      throw error
+    }
+  }
+
+  // 更新用户名
+  const updateUsername = async (username: string) => {
+    try {
+      await request.put('/user/update/username', null, { params: { username } })
+      await getUserInfo() // 更新后重新获取用户信息
+      ElMessage.success('用户名更新成功')
+    } catch (error) {
+      console.error('更新用户名失败:', error)
+      throw error
+    }
+  }
+
+  // 更新密码
+  const updatePassword = async (oldPassword: string, newPassword: string) => {
+    try {
+      await request.put('/user/update/password', null, { 
+        params: { oldPassword, newPassword } 
+      })
+      ElMessage.success('密码更新成功')
+    } catch (error) {
+      console.error('更新密码失败:', error)
+      throw error
+    }
+  }
+
   return {
     userInfo,
     token,
@@ -97,6 +134,9 @@ export const useUserStore = defineStore('user', () => {
     logout,
     getUserInfo,
     updateProfile,
+    updateEmail,
+    updateUsername,
+    updatePassword,
     setToken,
     clearToken
   }

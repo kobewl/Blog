@@ -148,4 +148,93 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setRole(role);
         userMapper.updateById(user);
     }
+
+    @Override
+    public void updateEmail(String email) {
+        // 获取当前用户
+        User currentUser = getCurrentUser();
+        if (currentUser == null) {
+            throw new BusinessException("用户未登录");
+        }
+
+        // 验证邮箱格式
+        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            throw new BusinessException("邮箱格式不正确");
+        }
+
+        // 检查邮箱是否已被其他用户使用
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getEmail, email)
+                   .ne(User::getId, currentUser.getId());
+        if (this.count(queryWrapper) > 0) {
+            throw new BusinessException("该邮箱已被其他用户使用");
+        }
+
+        // 更新邮箱
+        User user = new User();
+        user.setId(currentUser.getId());
+        user.setEmail(email);
+        if (!this.updateById(user)) {
+            throw new BusinessException("更新邮箱失败");
+        }
+    }
+
+    @Override
+    public void updateUsername(String username) {
+        // 获取当前用户
+        User currentUser = getCurrentUser();
+        if (currentUser == null) {
+            throw new BusinessException("用户未登录");
+        }
+
+        // 验证用户名格式
+        if (username.length() < 2 || username.length() > 20) {
+            throw new BusinessException("用户名长度应在2-20个字符之间");
+        }
+
+        // 检查用户名是否已被使用
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getUsername, username)
+                   .ne(User::getId, currentUser.getId());
+        if (this.count(queryWrapper) > 0) {
+            throw new BusinessException("该用户名已被使用");
+        }
+
+        // 更新用户名
+        User user = new User();
+        user.setId(currentUser.getId());
+        user.setUsername(username);
+        if (!this.updateById(user)) {
+            throw new BusinessException("更新用户名失败");
+        }
+    }
+
+    @Override
+    public void updatePassword(String oldPassword, String newPassword) {
+        // 获取当前用户
+        User currentUser = getCurrentUser();
+        if (currentUser == null) {
+            throw new BusinessException("用户未登录");
+        }
+
+        // 验证旧密码
+        String encodedOldPassword = DigestUtils.md5DigestAsHex(oldPassword.getBytes());
+        User fullUser = userMapper.selectById(currentUser.getId());
+        if (!fullUser.getPassword().equals(encodedOldPassword)) {
+            throw new BusinessException("旧密码不正确");
+        }
+
+        // 验证新密码格式
+        if (newPassword.length() < 6) {
+            throw new BusinessException("新密码长度不能小于6位");
+        }
+
+        // 更新密码
+        User user = new User();
+        user.setId(currentUser.getId());
+        user.setPassword(DigestUtils.md5DigestAsHex(newPassword.getBytes()));
+        if (!this.updateById(user)) {
+            throw new BusinessException("更新密码失败");
+        }
+    }
 }
