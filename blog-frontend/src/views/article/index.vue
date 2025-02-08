@@ -32,7 +32,9 @@
         <el-table-column prop="title" label="标题" min-width="200">
           <template #default="{ row }">
             <div class="article-title">
-              <span class="title-text">{{ row.title }}</span>
+              <router-link :to="'/article/' + row.id" class="title-text">
+                {{ row.title }}
+              </router-link>
               <span class="view-count" v-if="row.viewCount">
                 <el-icon><View /></el-icon>
                 {{ row.viewCount }}
@@ -254,6 +256,11 @@ onMounted(() => {
       .title-text {
         color: $text-primary;
         font-weight: 500;
+        text-decoration: none;
+        
+        &:hover {
+          color: $primary-color;
+        }
       }
 
       .view-count {

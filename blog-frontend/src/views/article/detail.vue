@@ -1,39 +1,65 @@
 <template>
   <div class="article-detail">
-    <el-card>
-      <h1 class="title">{{ article?.title }}</h1>
-      <div class="meta">
-        <span>发布时间：{{ formatDate(article?.createTime) }}</span>
-      </div>
-      <div class="content markdown-body" v-html="article?.content"></div>
+    <el-card class="article-card" v-loading="loading">
+      <template v-if="article">
+        <h1 class="article-title">{{ article.title }}</h1>
+        <div class="article-meta">
+          <span class="time">
+            <el-icon><Clock /></el-icon>
+            {{ formatDate(article.createTime) }}
+          </span>
+          <span class="views">
+            <el-icon><View /></el-icon>
+            {{ article.viewCount || 0 }} 阅读
+          </span>
+        </div>
+        <div class="article-content markdown-body" v-html="renderedContent"></div>
+      </template>
+    </el-card>
+
+    <!-- 评论区 -->
+    <el-card class="comment-card">
+      <CommentSection :article-id="Number(articleId)" />
     </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { useArticleStore } from '../../stores/article'
-import type { Article } from '../../types'
+import { ElMessage } from 'element-plus'
+import { Clock, View } from '@element-plus/icons-vue'
 import { marked } from 'marked'
+import { useArticleStore } from '../../stores/article'
+import CommentSection from './components/CommentSection.vue'
+import 'github-markdown-css'
 
 const route = useRoute()
 const articleStore = useArticleStore()
-const article = ref<Article>()
+const loading = ref(false)
+const article = ref<any>(null)
+const articleId = route.params.id
 
+// 渲染Markdown内容
+const renderedContent = computed(() => {
+  if (!article.value?.content) return ''
+  return marked(article.value.content)
+})
+
+// 加载文章详情
 const loadArticle = async () => {
-  const id = route.params.id
-  if (id) {
-    const data = await articleStore.getArticleDetail(Number(id))
-    article.value = {
-      ...data,
-      content: marked(data.content)
-    }
+  loading.value = true
+  try {
+    article.value = await articleStore.getArticleDetail(Number(articleId))
+  } catch (error) {
+    console.error('获取文章详情失败:', error)
+    ElMessage.error('获取文章详情失败')
+  } finally {
+    loading.value = false
   }
 }
 
-const formatDate = (date?: string) => {
-  if (!date) return ''
+const formatDate = (date: string) => {
   return new Date(date).toLocaleString()
 }
 
@@ -45,22 +71,44 @@ onMounted(() => {
 <style scoped lang="scss">
 .article-detail {
   padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 
-  .title {
-    font-size: 24px;
-    color: #303133;
+  .article-card {
     margin-bottom: 20px;
+
+    .article-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .article-meta {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      color: #666;
+      margin-bottom: 24px;
+      font-size: 14px;
+
+      .time, .views {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+    }
+
+    .article-content {
+      line-height: 1.8;
+      color: #333;
+    }
   }
 
-  .meta {
-    font-size: 14px;
-    color: #909399;
-    margin-bottom: 30px;
-  }
-
-  .content {
-    line-height: 1.8;
-    color: #303133;
+  :deep(.markdown-body) {
+    background-color: transparent;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   }
 }
 </style> 
