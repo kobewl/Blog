@@ -1,16 +1,18 @@
 import axios from 'axios'
+import type { AxiosInstance, AxiosRequestConfig } from 'axios'
 import { ElMessage } from 'element-plus'
 import router from '../router'
 import { useUserStore } from '../stores/user'
+import type { ApiResponse } from '../types'
 
-// 创建axios实例
-const request = axios.create({
+// 创建 axios 实例
+const instance = axios.create({
   baseURL: '/api',
   timeout: 5000
 })
 
 // 请求拦截器
-request.interceptors.request.use(
+instance.interceptors.request.use(
   config => {
     // 从 localStorage 获取 token
     const token = localStorage.getItem('token')
@@ -27,7 +29,7 @@ request.interceptors.request.use(
 )
 
 // 响应拦截器
-request.interceptors.response.use(
+instance.interceptors.response.use(
   response => {
     const res = response.data
     
@@ -82,5 +84,21 @@ request.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+// 封装请求方法
+const request = {
+  get: <T>(url: string, config?: AxiosRequestConfig) => {
+    return instance.get<any, T>(url, config)
+  },
+  post: <T>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    return instance.post<any, T>(url, data, config)
+  },
+  put: <T>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    return instance.put<any, T>(url, data, config)
+  },
+  delete: <T>(url: string, config?: AxiosRequestConfig) => {
+    return instance.delete<any, T>(url, config)
+  }
+}
 
 export default request 

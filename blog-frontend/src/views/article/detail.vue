@@ -29,10 +29,10 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Clock, View } from '@element-plus/icons-vue'
-import { marked } from 'marked'
+import * as marked from 'marked'
 import { useArticleStore } from '../../stores/article'
 import CommentSection from './components/CommentSection.vue'
-import 'github-markdown-css'
+import 'github-markdown-css/github-markdown.css'
 
 const route = useRoute()
 const articleStore = useArticleStore()
@@ -43,7 +43,7 @@ const articleId = route.params.id
 // 渲染Markdown内容
 const renderedContent = computed(() => {
   if (!article.value?.content) return ''
-  return marked(article.value.content)
+  return marked.parse(article.value.content)
 })
 
 // 加载文章详情
@@ -100,7 +100,7 @@ onMounted(() => {
       }
     }
 
-    .article-content {
+    :deep(.article-content) {
       line-height: 1.8;
       color: #333;
     }
@@ -108,6 +108,7 @@ onMounted(() => {
 
   :deep(.markdown-body) {
     background-color: transparent;
+    padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   }
 }

@@ -23,6 +23,18 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('token')
   }
 
+  // 注册
+  const register = async (data: { username: string; password: string; email: string }) => {
+    try {
+      const response = await request.post('/user/register', data)
+      ElMessage.success('注册成功')
+      return response
+    } catch (error: any) {
+      console.error('注册失败:', error)
+      throw new Error(error?.response?.data?.message || '注册失败，请重试')
+    }
+  }
+
   // 登录
   const login = async (username: string, password: string) => {
     try {
@@ -138,6 +150,7 @@ export const useUserStore = defineStore('user', () => {
     updateUsername,
     updatePassword,
     setToken,
-    clearToken
+    clearToken,
+    register
   }
 }) 

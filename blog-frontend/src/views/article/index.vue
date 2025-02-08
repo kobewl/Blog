@@ -50,14 +50,14 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="status" label="作者" width="100">
           <template #default="{ row }">
             <el-tag 
-              :type="row.status === 1 ? 'success' : 'info'"
-              class="status-tag"
-              effect="light"
+              type="info"
+              class="author-tag"
+              effect="plain"
             >
-              {{ row.status === 1 ? '已发布' : '草稿' }}
+              {{ row.username }}
             </el-tag>
           </template>
         </el-table-column>
@@ -279,7 +279,7 @@ onMounted(() => {
       color: $text-secondary;
     }
 
-    .status-tag {
+    .author-tag {
       font-weight: 500;
       padding: 4px 12px;
       border-radius: $border-radius-sm;
